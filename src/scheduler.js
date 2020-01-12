@@ -1,5 +1,5 @@
-module.exports = ({ listeners }) => {
-    let stream = require("fs").createReadStream("test.mp3");
+module.exports = ({ listeners, previous }) => {
+    let stream = require("fs").createReadStream("test2.mp3");
 
     return {
         stream,

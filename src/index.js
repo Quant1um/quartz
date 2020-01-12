@@ -1,6 +1,6 @@
 const streamingRouter = require("./streaming_router");
 const longpollRouter = require("./longpoll_router");
-
+const decoder = require("./decoder");
 const scheduler = require("./scheduler");
 
 const express = require("express");
@@ -32,9 +32,7 @@ const setData = (data) => {
         if(currentStream.close) currentStream.close();
     }
 
-    data.stream.pipe(stream);
-
-    currentStream = data.stream;
+    currentStream = data.stream.pipe(decoder()).pipe(stream);
     currentData = { 
         title: data.title, 
         author: data.author, 
@@ -45,7 +43,7 @@ const setData = (data) => {
     event("track", currentData);
 };
 
-const update = () => setData(scheduler({ listeners }));
+const update = () => setData(scheduler({ listeners, previous: currentData }));
 
 //listener count
 let listeners = 0;
@@ -68,3 +66,5 @@ app.use("/events", event.router);
 app.get("/data", (_, res) => res.json({ ...currentData, listeners }));
 
 app.listen(process.env.PORT || 3002);
+
+process.on("warning", (e) => console.warn(e.stack));

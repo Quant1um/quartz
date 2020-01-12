@@ -18,11 +18,17 @@ module.exports = ({ historySize = 20 } = {}) => {
         }
 
         clients.add(res);
-        res.socket.on("end", () => clients.delete(res));
+
+        res.delete = () => clients.delete(res);
+        res.socket.once("end", res.delete);
     });
 
     const broadcast = (data) => {
-        clients.forEach(cli => cli.json(data));
+        clients.forEach(cli => {
+            cli.json(data);
+            cli.socket.off("end", cli.delete);
+        });
+        
         clients.clear();
     };
 

@@ -31,7 +31,6 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
     const clients = new Set();
 
     const dummy = new DummyStream();
-    const decoder = new lame.Decoder();
     const encoder = new lame.Encoder({
         // input
         channels: 2,        // 2 channels (left and right)
@@ -54,7 +53,7 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
         dummy.emit("connected", req, res);
         clients.add(res);
 
-        res.socket.on("end", () => {
+        res.socket.once("end", () => {
             dummy.emit("disconnected", req, res);
             clients.delete(res);
             res.end();
@@ -64,8 +63,7 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
     const broadcast = (data) => clients.forEach(cli => cli.write(data));
 
     dummy
-        .pipe(decoder, { end: false })
-        .pipe(encoder)
+        .pipe(encoder, { end: false })
         .pipe(new Throttle(bitrate * 1000 / 8))
         .on("data", broadcast);
 
