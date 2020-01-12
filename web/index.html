@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Quartz Radio</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Quicksand:400&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Titillium+Web:600&display=swap" rel="stylesheet">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/audio.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/visualizer.js"></script>
+        <script src="js/ajax.js"></script>
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/slider.css">
+    </head>
+
+    <body>
+        <div class="background">
+            <img class="background-image current" />
+            <img class="background-image" />
+        </div>
+
+        <div class="header">
+            <span class="title">Quartz Radio</span> <span class="subtitle">by <a href="https://github.com/Quant1um">Quant1um</a></span>
+            <span class="slider"><input type="range" min="0" max="100" value="0" class="range" id="volume"/></span>
+        </div>
+
+        <div class="container">
+            <div class="info" id="info-container">
+                <div class="thumbnail">
+                    <img class="thumbnail-image" id="image-main" />
+                </div>
+
+                <div class="description">
+                    <div class="data"><span class="primary" id="info-title">Quartz</span></div>
+                    <div class="data"><span class="secondary" id="info-author">Radio</span></div>
+                    <div class="data"><span class="secondary listener-count" id="info-listeners">No one is listening right now</span></div>
+                </div>
+            </div>
+
+            <div class="visualizer-container">
+                <canvas id="visualizer" class="visualizer"></canvas>
+            </div>
+        </div>
+    </body>
+</html>

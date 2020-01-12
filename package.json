@@ -1,0 +1,23 @@
+{
+  "name": "quartz",
+  "version": "0.0.1",
+  "description": "Online-streaming radio",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "radio",
+    "online",
+    "streaming"
+  ],
+  "author": "Quant1um",
+  "license": "MIT",
+  "dependencies": {
+    "double-ended-queue": "^2.1.0-0",
+    "express": "^4.17.1",
+    "lame": "^1.2.4",
+    "lodash": "^4.17.15",
+    "throttle": "^1.0.3"
+  }
+}

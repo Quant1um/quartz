@@ -1,0 +1,109 @@
+.range {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: transparent;
+}
+
+.range:focus {
+    outline: none;
+}
+
+.range::-webkit-slider-runnable-track,
+.range::-moz-range-track {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    height: 2px;
+
+        
+    -moz-transition: background-color 1s ease;
+    -webkit-transition: background-color 1s ease;
+    transition: background-color 1s ease;
+}
+
+.neutral .range::-webkit-slider-runnable-track,
+.neutral .range::-moz-range-track {
+    background: #ffffff;
+}
+
+.cyan .range::-webkit-slider-runnable-track,
+.cyan .range::-moz-range-track {
+    background: #3bade3;
+}
+
+.purple .range::-webkit-slider-runnable-track,
+.purple .range::-moz-range-track {
+    background: #9a38f5;
+}
+
+.green .range::-webkit-slider-runnable-track,
+.green .range::-moz-range-track {
+    background: #26ff2d;
+}
+
+.orange .range::-webkit-slider-runnable-track,
+.orange .range::-moz-range-track {
+    background: #ff8b26;
+}
+
+.red .range::-webkit-slider-runnable-track,
+.red .range::-moz-range-track {
+    background: #ff2626;
+}
+
+.range::-webkit-slider-thumb,
+.range::-moz-range-thumb {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+
+    border: 2px solid;
+    border-radius: 50%;
+    height: 15px;
+    width: 15px;
+    max-width: 80px;
+    position: relative;
+    bottom: 11px;
+    background-color: #1d1c25;
+    cursor: -webkit-grab;
+
+    -moz-transition: border 1s ease;
+    -webkit-transition: border 1s ease;
+    transition: border 1s ease;
+}
+
+.neutral .range::-webkit-slider-thumb,
+.neutral .range::-moz-range-thumb {
+    border-color: #ffffff;
+}
+
+.cyan .range::-webkit-slider-thumb,
+.cyan .range::-moz-range-thumb {
+    border-color: #3bade3;
+}
+
+.purple .range::-webkit-slider-thumb,
+.purple .range::-moz-range-thumb {
+    border-color: #9a38f5;
+}
+
+.green .range::-webkit-slider-thumb,
+.green .range::-moz-range-thumb {
+    border-color: #26ff2d;
+}
+
+.orange .range::-webkit-slider-thumb,
+.orange .range::-moz-range-thumb {
+    border-color: #ff8b26;
+}
+
+.red .range::-webkit-slider-thumb,
+.red .range::-moz-range-thumb {
+    border-color: #ff2626;
+}
+
+.range::-webkit-slider-thumb:active {
+    cursor: -webkit-grabbing;
+}
+
+.range::-moz-range-thumb:active {
+    cursor: -moz-grabbing;
+}
