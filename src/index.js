@@ -10,14 +10,15 @@ const stream = streamingRouter({ bitrate: 128, sampleRate: 44100 });
 const event = longpollRouter({ historySize: 20 });
 
 let currentStream = null;
-let currentData = {
+let currentTrack = {
     title: "Quartz",
     author: "Radio",
     colorScheme: "neutral",
     thumbnail: ""
 }
 
-const setData = (data) => {
+const setTrack = (data) => {
+    if(!data) throw new Error("invalid data");
     if(!data.stream) throw new Error("invalid stream");
 
     data = Object.assign({
@@ -32,18 +33,20 @@ const setData = (data) => {
         if(currentStream.close) currentStream.close();
     }
 
-    currentStream = data.stream.pipe(decoder()).pipe(stream);
-    currentData = { 
+    currentStream = data.stream.pipe(decoder());
+    currentStream.pipe(stream);
+
+    currentTrack = { 
         title: data.title, 
         author: data.author, 
         colorScheme: data.colorScheme, 
         thumbnail: data.thumbnail 
     };
 
-    event("track", currentData);
+    event("track", currentTrack);
 };
 
-const update = () => setData(scheduler({ listeners, previous: currentData }));
+const update = () => setTrack(scheduler({ listeners, previous: currentTrack }));
 
 //listener count
 let listeners = 0;
@@ -63,7 +66,7 @@ update();
 app.use("/", express.static("web"));
 app.use("/stream", stream.router);
 app.use("/events", event.router);
-app.get("/data", (_, res) => res.json({ ...currentData, listeners }));
+app.get("/data", (_, res) => res.json({ ...currentTrack, listeners }));
 
 app.listen(process.env.PORT || 3002);
 
