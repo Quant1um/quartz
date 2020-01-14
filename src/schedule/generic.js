@@ -91,5 +91,6 @@ module.exports = () => {
         id = Math.floor(Math.random() * data.length);
     } while(id === lastId);
 
+    lastId = id;
     return track(data[id]);
 };
