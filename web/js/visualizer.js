@@ -10,21 +10,27 @@ const roundRect = (ctx, x, y, w, h) => {
     return ctx;
 };
 
-const gradients = {
-    red:        [245, 52,  89,  255, 235, 85,  52,  245],
-    orange:     [255, 139, 38,  255, 245, 59,  154, 245],
-    green:      [38,  255, 45,  255, 59,  245, 177, 245],
-    cyan:       [59,  173, 227, 255, 174, 43,  255, 245],
-    purple:     [154, 56,  245, 255, 245, 59,  146, 245],
-    neutral:    [255, 255, 255, 255, 255, 255, 255, 245],
-    
-    start:      [255, 255, 255, 0,   255, 255, 255, 0  ]
+//rotate color hue by 20 degrees
+const createAuxilaryColor = (cur, aux) => {
+    const U = Math.cos(0.349);
+    const W = Math.sin(0.349);
+  
+    aux[0] = (.299+.701*U+.168*W) * cur[0]
+      + (.587-.587*U+.330*W)      * cur[1]
+      + (.114-.114*U-.497*W)      * cur[2];
+    aux[1] = (.299-.299*U-.328*W) * cur[0]
+      + (.587+.413*U+.035*W)      * cur[1]
+      + (.114-.114*U+.292*W)      * cur[2];
+    aux[2] = (.299-.3*U+1.25*W)   * cur[0]
+      + (.587-.588*U-1.05*W)      * cur[1]
+      + (.114+.886*U-.203*W)      * cur[2];
+    aux[3] = cur[3];
 };
 
-let current = gradients.start;
-let target = gradients.neutral;
-
 $(function() {
+    let current = [255, 255, 255, 0];
+    let auxilary = [255, 255, 255, 0];
+
     const canvas = $("#visualizer")[0];
     const context = canvas.getContext("2d");
 
@@ -34,14 +40,16 @@ $(function() {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
 
-        target = gradients[QuartzUi.getScheme()] || gradients.neutral;
-        for(let i = 0; i < 8; i++) {
-            current[i] += (target[i] - current[i]) * 0.1;
+        let color = QuartzUi.getColor();
+        for(let i = 0; i < 4; i++) {
+            current[i] += (color[i] - current[i]) * 0.1;
         }
 
+        createAuxilaryColor(current, auxilary);
+        
         const grd = context.createLinearGradient(0, 0, canvas.width, canvas.height);
         grd.addColorStop(0, `rgba(${current[0]}, ${current[1]}, ${current[2]}, ${current[3]})`);
-        grd.addColorStop(1, `rgba(${current[4]}, ${current[5]}, ${current[6]}, ${current[7]})`);
+        grd.addColorStop(1, `rgba(${auxilary[0]}, ${auxilary[1]}, ${auxilary[2]}, ${auxilary[3]})`);
         context.fillStyle = grd;
 
         const buffer = QuartzAudio.fft();

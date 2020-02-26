@@ -1,5 +1,4 @@
-const colorSchemes = ["red", "orange", "green", "cyan", "purple", "neutral"];
-let currentScheme = null;
+let color = null;
 
 const startAnimation = (selector) => {
     const animatable = $(selector);
@@ -8,15 +7,33 @@ const startAnimation = (selector) => {
     requestAnimationFrame(() => animatable.css("animation", ""));
 };
 
+const validateColor = (col) => {
+    if(!Array.isArray(col)) return null;
+    col[0] = Math.max(0, Math.min(255, +col[0]));
+    col[1] = Math.max(0, Math.min(255, +col[1]));
+    col[2] = Math.max(0, Math.min(255, +col[2]));
+    col[3] = Math.max(0, Math.min(100, +col[3]));
+    return col;
+}
+
 $(function() {
-    const body = $("body");
+    const cStyle = $("<style></style>").appendTo("head");
 
     window.QuartzUi = {
-        getScheme: () => currentScheme,
-        setScheme: (scheme) => {
-            if (!colorSchemes.includes(scheme)) throw new Error("unknown color scheme");
-            colorSchemes.forEach((s) => s === scheme ? body.addClass(s) : body.removeClass(s))
-            currentScheme = scheme;
+        getColor: () => color,
+        setColor: (col) => {
+            color = validateColor(col) || [255, 255, 255, 100];
+
+            cStyle.html(`
+                .range::-webkit-slider-runnable-track,
+                .range::-moz-range-track {
+                    background: rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]});
+                }
+            
+                .range::-webkit-slider-thumb,
+                .range::-moz-range-thumb {
+                    border-color: rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]});
+                }`);
         },
 
         setData: (title, author, thumbnail) => {
@@ -45,7 +62,7 @@ $(function() {
         }
     };
 
-    QuartzUi.setScheme("neutral");
+    QuartzUi.setColor([255, 255, 255, 100]);
 
     const volume = $("#volume");
     const updateVolume = () => QuartzAudio.setVolume(volume.val() / 100);

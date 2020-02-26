@@ -1,47 +1,14 @@
 const express = require("express");
 const stream = require("stream");
+const EventEmitter = require("events");
 
 const lame = require("lame");
 const Throttle = require("throttle");
 
-class DummyStream extends stream.Transform {
-    _transform(chunk, _, cb) {
-        cb(null, chunk);
-    }
-
-    end(chunk, encoding, cb) { 
-        if (typeof chunk === 'function') {
-            cb = chunk;
-            chunk = null;
-            encoding = null;
-        } else if (typeof encoding === 'function') {
-            cb = encoding;
-            encoding = null;
-        }
-
-        if (chunk !== null && chunk !== undefined) this.write(chunk, encoding);
-
-        if(cb) cb();
-        this.emit("finish");
-    }
-}
-
 module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
     const router = express.Router();
     const clients = new Set();
-
-    const dummy = new DummyStream();
-    const encoder = new lame.Encoder({
-        // input
-        channels: 2,        // 2 channels (left and right)
-        bitDepth: 16,       // 16-bit samples
-        sampleRate: 44100,  // 44,100 Hz sample rate
-       
-        // output
-        bitRate: bitrate,
-        outSampleRate: sampleRate,
-        mode: lame.STEREO
-    });
+    const streaming = new EventEmitter();
 
     router.get("/", (req, res) => {
         res.writeHead(200, {
@@ -50,11 +17,11 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
             "Cache-Control": "no-cache"
         });
 
-        dummy.emit("connected", req, res);
+        streaming.emit("connected", req, res);
         clients.add(res);
 
-        res.socket.once("end", () => {
-            dummy.emit("disconnected", req, res);
+        res.socket.once("close", () => {
+            streaming.emit("disconnected", req, res);
             clients.delete(res);
             res.end();
         });
@@ -62,11 +29,26 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
 
     const broadcast = (data) => clients.forEach(cli => cli.write(data));
 
-    dummy
-        .pipe(encoder, { end: false })
-        .pipe(new Throttle(bitrate * 1000 / 8))
-        .on("data", broadcast);
+    let source = null;
+    const bindSource = (stream) => {
+        if(source != null && source.close) source.close();
+        source = stream
+            .pipe(new lame.Decoder())
+            .pipe(new lame.Encoder({
+                channels: 2,
+                bitDepth: 16,
+                sampleRate: 44100,
+               
+                bitRate: bitrate,
+                outSampleRate: sampleRate,
+                mode: lame.STEREO
+            }))
+            .pipe(new Throttle(bitrate * 1000 / 8))
+            .on("data", broadcast)
+            .on("finish", () => streaming.emit("finish"));
+    };
 
-    dummy.router = router;
-    return dummy;
+    streaming.bind = bindSource;
+    streaming.router = router;
+    return streaming;
 };

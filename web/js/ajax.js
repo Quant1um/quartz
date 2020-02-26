@@ -6,11 +6,11 @@ $(function() {
             data = Object.assign({
                 title: "ID",
                 author: "ID",
-                colorScheme: "neutral",
+                color: [255, 255, 255, 100],
                 thumbnail: ""
             }, data);
 
-            QuartzUi.setScheme(data.colorScheme);
+            QuartzUi.setColor(data.color);
             QuartzUi.setBackground(data.thumbnail);
             QuartzUi.setData(data.title, data.author, data.thumbnail);
         } 
@@ -20,13 +20,13 @@ $(function() {
         data = Object.assign({
             title: "ID",
             author: "ID",
-            colorScheme: "neutral",
+            color: [255, 255, 255, 100],
             thumbnail: "",
             listeners: 0
         }, data);
 
         QuartzUi.setListenerCount(data.listeners);
-        QuartzUi.setScheme(data.colorScheme);
+        QuartzUi.setColor(data.color);
         QuartzUi.setBackground(data.thumbnail);
         QuartzUi.setData(data.title, data.author, data.thumbnail);
     };

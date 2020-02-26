@@ -1,19 +1,17 @@
-const streamingRouter = require("./streaming_router");
-const longpollRouter = require("./longpoll_router");
-const decoder = require("./decoder");
+const createStreamingRouter = require("./streaming_router");
+const createLongpollRouter = require("./longpoll_router");
 const scheduler = require("./scheduler");
 
 const express = require("express");
 const app = express();
 
-const stream = streamingRouter({ bitrate: 128, sampleRate: 44100 });
-const event = longpollRouter({ historySize: 20 });
+const stream = createStreamingRouter({ bitrate: 128, sampleRate: 44100 });
+const event = createLongpollRouter({ historySize: 20 });
 
-let currentStream = null;
 let currentTrack = {
     title: "Quartz",
     author: "Radio",
-    colorScheme: "neutral",
+    color: [255, 255, 255, 100],
     thumbnail: ""
 }
 
@@ -24,29 +22,23 @@ const setTrack = (data) => {
     data = Object.assign({
         title: "ID",
         author: "ID",
-        colorScheme: "neutral",
+        color: [255, 255, 255, 100],
         thumbnail: ""
     }, data);
 
-    if(currentStream) {
-        currentStream.unpipe(stream);
-        if(currentStream.close) currentStream.close();
-    }
-
-    currentStream = data.stream.pipe(decoder());
-    currentStream.pipe(stream);
+    stream.bind(data.stream);
 
     currentTrack = { 
         title: data.title, 
         author: data.author, 
-        colorScheme: data.colorScheme, 
+        color: data.color, 
         thumbnail: data.thumbnail 
     };
 
     event("track", currentTrack);
 };
 
-const update = () => setTrack(scheduler({ listeners, previous: currentTrack }));
+const updateTrack = () => setTrack(scheduler({ listeners, previous: currentTrack }));
 
 //listener count
 let listeners = 0;
@@ -60,8 +52,8 @@ stream.on("disconnected", () => {
     event("listeners", listeners);
 });
 
-stream.on("finish", update);
-update();
+stream.on("finish", updateTrack);
+updateTrack();
 
 app.use("/", express.static("web"));
 app.use("/stream", stream.router);
