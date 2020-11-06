@@ -1,6 +1,6 @@
 const express = require("express");
 
-module.exports = ({ historySize = 20 } = {}) => {
+module.exports = ({ historySize = 20, bufferTime = 0.2 } = {}) => {
     const router = express.Router();
 
     const history = new Map();
@@ -13,7 +13,14 @@ module.exports = ({ historySize = 20 } = {}) => {
         const lid = parseInt(req.params.id) || 0;
 
         if(lid < id && history.has(lid)) {
-            res.json(history.get(lid));
+            res.set({
+                "Cache-Control": "no-cache, no-store, must-revalidate, proxy-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+                "Surrogate-Control": "no-store",
+
+                "Connection": "close"
+            }).json(history.get(lid));
             return;
         }
 
@@ -40,14 +47,25 @@ module.exports = ({ historySize = 20 } = {}) => {
         }
     };
 
-    const push = (type, data) => {
-        const d = { type, data, id: id + 1 };
+    let buffer = [];
+    const send = () => {
+        if(buffer.length == 0) return;
+
+        const d = { buffer, id: id + 1 };
         history.set(id, d);
         id++;
 
         limit(historySize);
         broadcast(d);
+
+        buffer = [];
     };
+
+    const push = (type, data) => {
+        buffer.push({ type, data });
+    };
+
+    setInterval(send, bufferTime);
 
     push.router = router;
     return push;

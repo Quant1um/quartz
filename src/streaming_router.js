@@ -1,11 +1,9 @@
 const express = require("express");
-const stream = require("stream");
 const EventEmitter = require("events");
-
 const lame = require("lame");
 const Throttle = require("throttle");
 
-module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
+module.exports = ({ bitrate = 96, outSampleRate = 44100 } = {}) => {
     const router = express.Router();
     const clients = new Set();
     const streaming = new EventEmitter();
@@ -14,7 +12,16 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
         res.writeHead(200, {
             "Content-Type": "audio/mpeg",
             "Transfer-Encoding": "chunked",
-            "Cache-Control": "no-cache"
+            "Connection": "close",
+            "Accept-Ranges": "none",
+
+            "Cache-Control": "no-cache, no-store, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "Surrogate-Control": "no-store",
+
+            //"Connection": "Keep-Alive",
+            //"Keep-Alive": "timeout=20, max=1000"
         });
 
         streaming.emit("connected", req, res);
@@ -29,23 +36,39 @@ module.exports = ({ bitrate = 96, sampleRate = 44100 } = {}) => {
 
     const broadcast = (data) => clients.forEach(cli => cli.write(data));
 
+    //const dump = require("fs").createWriteStream("audio.mp3");
+    //clients.add(dump);
+
     let source = null;
-    const bindSource = (stream) => {
-        if(source != null && source.close) source.close();
-        source = stream
-            .pipe(new lame.Decoder())
-            .pipe(new lame.Encoder({
-                channels: 2,
-                bitDepth: 16,
-                sampleRate: 44100,
-               
-                bitRate: bitrate,
-                outSampleRate: sampleRate,
-                mode: lame.STEREO
-            }))
-            .pipe(new Throttle(bitrate * 1000 / 8))
-            .on("data", broadcast)
-            .on("finish", () => streaming.emit("finish"));
+    const bindSource = (audio) => {
+        if(source && source.close) source.close();
+
+        if(audio) {
+            console.log(audio);
+
+            const { stream, channels, sampleRate, bitDepth } = audio;
+
+           // console.log(stream, channels, sampleRate, bitDepth);
+
+            let sum = 0;
+            stream.on("data", (a) => console.log(sum += a.length / (channels * sampleRate * (bitDepth / 8))));
+    
+            source = 
+                stream
+                .pipe(new lame.Encoder({
+                    channels,        
+                    bitDepth,    
+                    sampleRate, 
+    
+                    bitRate: bitrate,
+                    outSampleRate: outSampleRate,
+                    mode: lame.STEREO
+                }))
+                .pipe(new Throttle(bitrate * 1000 / 8)
+                .on("data", broadcast)
+                .on("error", () => streaming.emit("error"))
+                .on("end", () => streaming.emit("finish")));
+        }
     };
 
     streaming.bind = bindSource;

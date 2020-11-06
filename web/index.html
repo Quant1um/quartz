@@ -25,26 +25,28 @@
             <img class="background-image" />
         </div>
 
-        <div class="header">
-            <span class="title">Quartz Radio</span> <span class="subtitle">by <a href="https://github.com/Quant1um">Quant1um</a></span>
-            <span class="slider"><input type="range" min="0" max="100" value="0" class="range" id="volume"/></span>
+        <div id="visualizer-container" class="visualizer-container">
+            <canvas id="visualizer" class="visualizer"></canvas>
         </div>
 
-        <div class="container">
-            <div class="info" id="info-container">
-                <div class="thumbnail">
-                    <img class="thumbnail-image" id="image-main" />
-                </div>
-
-                <div class="description">
-                    <div class="data"><span class="primary" id="info-title">Quartz</span></div>
-                    <div class="data"><span class="secondary" id="info-author">Radio</span></div>
-                    <div class="data"><span class="secondary listener-count" id="info-listeners">No one is listening right now</span></div>
-                </div>
+        <div class="main">
+            <div class="header">
+                <span class="title">Quartz Radio</span> <span class="subtitle">by <a href="https://github.com/Quant1um">Quant1um</a></span>
+                <span class="slider"><input type="range" min="0" max="100" value="0" class="range" id="volume"/></span>
             </div>
-
-            <div class="visualizer-container">
-                <canvas id="visualizer" class="visualizer"></canvas>
+    
+            <div class="container">
+                <div class="info" id="info-container">
+                    <div class="thumbnail">
+                        <img class="thumbnail-image" id="image-main" />
+                    </div>
+    
+                    <div class="description">
+                        <div class="data"><span class="primary" id="info-title">Quartz</span></div>
+                        <div class="data"><span class="secondary" id="info-author">Radio</span></div>
+                        <div class="data"><span class="secondary listener-count" id="info-listeners">No one is listening right now</span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

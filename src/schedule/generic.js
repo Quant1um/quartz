@@ -1,4 +1,5 @@
-const request = require("request");
+const fetch = require("node-fetch");
+const lame = require("lame");
 
 const data = [
     {
@@ -75,14 +76,56 @@ const data = [
 ];
 
 const track = (d) => {
-    return {
-        title: d.title,
-        author: d.author,
-        thumbnail: d.thumbnail,
-        color: d.color,
-        stream: request(d.url)
-    };
+    return loadMp3Stream(d.url).then((data) => {
+        return {
+            title: d.title,
+            author: d.author,
+            thumbnail: d.thumbnail,
+            color: d.color,
+            stream: data
+        };
+    });
 };
+
+const loadTestStream = () => {
+    const stream = require("fs").createReadStream('E:/Users/Quant1um/Downloads/S1tkvvmEGFZM.128.mp3');
+
+    return fetch("https://air.radiorecord.ru:805/rmx_320").then((res) => {
+        return new Promise((resolve) => {
+            const decoder = new lame.Decoder();
+            stream.pipe(decoder);
+    
+            decoder.on("format", (format) => {
+                resolve({
+                    stream: decoder, 
+                    channels: format.channels, 
+                    sampleRate: format.sampleRate, 
+                    bitDepth: format.bitDepth
+                });
+            });
+        });
+    });
+};
+
+const loadMp3Stream = (url) => {
+    return fetch(url, { headers : {
+        "pragma": "mo-cache",
+        "cache-control": "no-cache"
+    }}).then((res) => 
+        new Promise((resolve, reject) => {
+            const decoder = new lame.Decoder();
+            res.body.pipe(decoder);
+
+            decoder.on("format", (format) => {
+                resolve({
+                    stream: decoder, 
+                    channels: format.channels, 
+                    sampleRate: format.sampleRate, 
+                    bitDepth: format.bitDepth
+                });
+            });
+        }));
+}
 
 let lastId = null;
 module.exports = () => {

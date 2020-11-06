@@ -36,7 +36,7 @@ $(function() {
             url: "/events/" + id,
             dataType: "json"
         }).done((json) => {
-            handleEvent(json.type, json.data);
+            json.buffer.forEach((data) => handleEvent(data.type, data.data));
             setTimeout(() => longPoll(json.id || id), 0);
         }).fail(() => {
             setTimeout(() => longPoll(id), 0);
