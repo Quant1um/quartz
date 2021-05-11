@@ -16,7 +16,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "lame": "^1.2.4",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
     "node-gyp": "^7.1.2",
     "throttle": "^1.0.3"
